@@ -19,14 +19,16 @@ type GoTrueSession struct {
 // User metadata is stored on auth.users; the application profile row is created separately.
 func (c *Client) SignUp(email, password string, metadata map[string]any) (*GoTrueUser, error) {
 	body := map[string]any{
-		"email":         email,
-		"password":      password,
-		"user_metadata": metadata,
+		"email":    email,
+		"password": password,
+		"data":     metadata,
 	}
 	path := "/auth/v1/signup"
 	useAnon := true
 	if c.HasServiceKey() {
+		delete(body, "data")
 		body["email_confirm"] = true
+		body["user_metadata"] = metadata
 		path = "/auth/v1/admin/users"
 		useAnon = false
 	}

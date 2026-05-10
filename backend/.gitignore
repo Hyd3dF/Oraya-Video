@@ -3,6 +3,8 @@
 *.log
 bin/
 tmp/
+.gocache/
+.gomodcache/
 oroya-server
 oroya-worker
 oroya-server.exe
