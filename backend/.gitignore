@@ -1,0 +1,9 @@
+.env
+.env.local
+*.log
+bin/
+tmp/
+oroya-server
+oroya-worker
+oroya-server.exe
+oroya-worker.exe
