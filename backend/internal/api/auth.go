@@ -93,6 +93,8 @@ func writeAuthError(w http.ResponseWriter, err error) {
 		utils.WriteError(w, http.StatusConflict, "username_taken", err.Error())
 	case errors.As(err, &sbErr) && sbErr.Status >= 500:
 		utils.WriteError(w, http.StatusBadGateway, "auth_service_failed", "authentication service could not create the user")
+	case errors.As(err, &sbErr) && sbErr.Status == http.StatusUnprocessableEntity:
+		utils.WriteError(w, http.StatusConflict, "email_taken", "email is already registered")
 	case errors.As(err, &sbErr) && sbErr.Status == http.StatusUnauthorized:
 		utils.WriteError(w, http.StatusBadGateway, "auth_service_unauthorized", "authentication service rejected the configured API key")
 	default:

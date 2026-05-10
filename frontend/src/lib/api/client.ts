@@ -137,6 +137,9 @@ export function friendlyApiMessage(error: unknown, fallback = 'Something went wr
 	if (error.code === 'username_taken') {
 		return 'This username is already taken.';
 	}
+	if (error.code === 'email_taken') {
+		return 'This email is already registered. Please log in instead.';
+	}
 	if (error.code === 'invalid_input' || error.code === 'bad_request') {
 		return 'Please check the form and try again.';
 	}
