@@ -66,7 +66,10 @@ func (s *AuthService) Register(ctx context.Context, req *models.RegisterRequest)
 
 	session, err := s.sb.PasswordSignIn(req.Email, req.Password)
 	if err != nil {
-		return nil, err
+		return &models.AuthResponse{
+			TokenType: "pending_confirmation",
+			User:      *profile,
+		}, nil
 	}
 	return sessionToResponse(session, profile), nil
 }

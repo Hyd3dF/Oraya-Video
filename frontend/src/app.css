@@ -183,6 +183,11 @@ img {
 	font-size: 13px;
 }
 
+.form-notice {
+	color: var(--success);
+	font-size: 13px;
+}
+
 .page-container {
 	max-width: var(--max-width);
 	margin: 0 auto;

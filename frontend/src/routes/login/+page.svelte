@@ -2,11 +2,13 @@
 	import { login } from '$lib/api/auth';
 	import { auth } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { friendlyApiMessage } from '$lib/api/client';
 
 	let email = $state('');
 	let password = $state('');
 	let error = $state('');
+	let notice = $state(page.url.searchParams.get('registered') ? 'Your account was created. Please log in.' : '');
 	let loading = $state(false);
 
 	async function handleSubmit(e: Event) {
@@ -55,6 +57,9 @@
 					required
 				/>
 			</div>
+			{#if notice}
+				<p class="form-notice">{notice}</p>
+			{/if}
 			{#if error}
 				<p class="form-error">{error}</p>
 			{/if}

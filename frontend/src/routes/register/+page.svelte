@@ -34,8 +34,12 @@
 		loading = true;
 		try {
 			const data = await register(email.trim(), password, realName.trim(), username.trim());
-			auth.setAuth(data);
-			goto('/');
+			if (data.access_token) {
+				auth.setAuth(data);
+				goto('/');
+			} else {
+				goto('/login?registered=1');
+			}
 		} catch (e) {
 			error = friendlyApiMessage(e, 'Registration failed. Please try again.');
 		} finally {
