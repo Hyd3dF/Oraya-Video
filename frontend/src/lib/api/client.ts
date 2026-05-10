@@ -141,7 +141,7 @@ export function friendlyApiMessage(error: unknown, fallback = 'Something went wr
 		return 'Please check the form and try again.';
 	}
 	if (error.status === 401 || error.status === 403) {
-		return 'We could not complete this action. Please check your account details and try again.';
+		return 'This action could not be completed right now. Please try again shortly.';
 	}
 	if (error.status === 404) {
 		return 'The requested item could not be found.';
