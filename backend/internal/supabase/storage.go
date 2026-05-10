@@ -34,7 +34,11 @@ func (c *Client) CreateSignedUploadURL(bucket, path string) (*SignedUploadURL, e
 		return nil, err
 	}
 	if !strings.HasPrefix(out.URL, "http") {
-		out.URL = c.baseURL + out.URL
+		if strings.HasPrefix(out.URL, "/storage/v1/") {
+			out.URL = c.baseURL + out.URL
+		} else {
+			out.URL = c.baseURL + "/storage/v1" + out.URL
+		}
 	}
 	out.Path = path
 	out.ExpiresAt = time.Now().Add(2 * time.Hour).Unix()
