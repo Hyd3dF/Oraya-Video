@@ -48,6 +48,11 @@
 		}
 	}
 
+	async function handleLogout() {
+		await auth.logout();
+		goto('/login');
+	}
+
 	let user = $derived(auth.user);
 </script>
 
@@ -72,7 +77,10 @@
 				<div class="profile-meta">
 					<span>{user.email}</span>
 				</div>
-				<a href="/profile/edit" class="btn btn-secondary btn-sm" style="margin-top:8px">Edit Profile</a>
+				<div class="profile-actions">
+					<a href="/profile/edit" class="btn btn-secondary btn-sm">Edit Profile</a>
+					<button class="btn btn-ghost btn-sm" onclick={handleLogout}>Logout</button>
+				</div>
 			</div>
 		</div>
 
@@ -131,6 +139,13 @@
 		margin-top: 12px;
 		font-size: 13px;
 		color: var(--text-muted);
+	}
+
+	.profile-actions {
+		display: flex;
+		gap: 8px;
+		margin-top: 12px;
+		flex-wrap: wrap;
 	}
 
 	.section-title {

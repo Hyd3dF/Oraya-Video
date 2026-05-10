@@ -1,6 +1,6 @@
 import { browser } from '$app/environment';
 import { getMe, logout as apiLogout } from '$lib/api/auth';
-import { saveTokens, clearTokens } from '$lib/api/client';
+import { saveTokens, clearTokens, tryRefreshToken } from '$lib/api/client';
 import type { Profile, AuthResponse } from '$lib/types';
 
 function createAuthStore() {
@@ -11,6 +11,7 @@ function createAuthStore() {
 
 	async function init() {
 		if (!browser) return;
+		if (initialized || !loading) return;
 		const token = localStorage.getItem('access_token');
 		if (!token) {
 			loading = false;
@@ -21,8 +22,18 @@ function createAuthStore() {
 			const profile = await getMe();
 			user = profile;
 		} catch {
-			clearTokens();
-			user = null;
+			const refreshed = await tryRefreshToken();
+			if (refreshed) {
+				try {
+					user = await getMe();
+				} catch {
+					clearTokens();
+					user = null;
+				}
+			} else {
+				clearTokens();
+				user = null;
+			}
 		} finally {
 			loading = false;
 			initialized = true;
@@ -30,7 +41,9 @@ function createAuthStore() {
 	}
 
 	function setAuth(data: AuthResponse) {
-		saveTokens(data.access_token, data.refresh_token);
+		if (data.access_token && data.refresh_token) {
+			saveTokens(data.access_token, data.refresh_token);
+		}
 		user = data.user;
 		error = null;
 	}

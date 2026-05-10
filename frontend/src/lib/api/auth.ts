@@ -13,7 +13,9 @@ export async function register(
 		real_name,
 		username
 	});
-	saveTokens(data.access_token, data.refresh_token);
+	if (data.access_token && data.refresh_token) {
+		saveTokens(data.access_token, data.refresh_token);
+	}
 	return data;
 }
 
