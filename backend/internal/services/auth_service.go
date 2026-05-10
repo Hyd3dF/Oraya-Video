@@ -61,7 +61,14 @@ func (s *AuthService) Register(ctx context.Context, req *models.RegisterRequest)
 		UpdatedAt: now,
 	}
 	if err := s.users.CreateProfile(ctx, profile); err != nil {
-		return nil, err
+		session, loginErr := s.sb.PasswordSignIn(req.Email, req.Password)
+		if loginErr != nil {
+			return &models.AuthResponse{
+				TokenType: "pending_confirmation",
+				User:      *profile,
+			}, nil
+		}
+		return sessionToResponse(session, profile), nil
 	}
 
 	session, err := s.sb.PasswordSignIn(req.Email, req.Password)

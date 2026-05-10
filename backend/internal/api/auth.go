@@ -8,6 +8,7 @@ import (
 	mw "github.com/oroya/backend/internal/middleware"
 	"github.com/oroya/backend/internal/models"
 	"github.com/oroya/backend/internal/services"
+	"github.com/oroya/backend/internal/supabase"
 	"github.com/oroya/backend/internal/utils"
 )
 
@@ -84,11 +85,16 @@ func (h *AuthHandler) Google(w http.ResponseWriter, r *http.Request) {
 }
 
 func writeAuthError(w http.ResponseWriter, err error) {
+	var sbErr *supabase.APIError
 	switch {
 	case errors.Is(err, services.ErrInvalidInput):
 		utils.WriteError(w, http.StatusBadRequest, "invalid_input", err.Error())
 	case errors.Is(err, services.ErrUsernameTaken):
 		utils.WriteError(w, http.StatusConflict, "username_taken", err.Error())
+	case errors.As(err, &sbErr) && sbErr.Status >= 500:
+		utils.WriteError(w, http.StatusBadGateway, "auth_service_failed", "authentication service could not create the user")
+	case errors.As(err, &sbErr) && sbErr.Status == http.StatusUnauthorized:
+		utils.WriteError(w, http.StatusBadGateway, "auth_service_unauthorized", "authentication service rejected the configured API key")
 	default:
 		utils.WriteError(w, http.StatusUnauthorized, "auth_failed", err.Error())
 	}

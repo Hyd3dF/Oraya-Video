@@ -147,6 +147,9 @@ export function friendlyApiMessage(error: unknown, fallback = 'Something went wr
 		return 'The requested item could not be found.';
 	}
 	if (error.status >= 500) {
+		if (error.code === 'auth_service_failed') {
+			return 'Account creation is temporarily unavailable. Please try again shortly.';
+		}
 		return 'The server is temporarily unavailable. Please try again shortly.';
 	}
 	return fallback;
