@@ -1,6 +1,9 @@
 package supabase
 
-import "net/http"
+import (
+	"errors"
+	"net/http"
+)
 
 type GoTrueUser struct {
 	ID    string `json:"id"`
@@ -36,9 +39,19 @@ func (c *Client) SignUp(email, password string, metadata map[string]any) (*GoTru
 	if err != nil {
 		return nil, err
 	}
-	var u GoTrueUser
-	if err := decode(resp, &u); err != nil {
+	var out struct {
+		GoTrueUser
+		User GoTrueUser `json:"user"`
+	}
+	if err := decode(resp, &out); err != nil {
 		return nil, err
+	}
+	u := out.GoTrueUser
+	if u.ID == "" {
+		u = out.User
+	}
+	if u.ID == "" {
+		return nil, errors.New("signup response missing user id")
 	}
 	return &u, nil
 }

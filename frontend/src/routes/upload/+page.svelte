@@ -3,7 +3,7 @@
 	import { auth } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
 	import { getUploadUrl, createVideo } from '$lib/api/videos';
-	import { ApiError } from '$lib/api/client';
+	import { ApiError, friendlyApiMessage } from '$lib/api/client';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 
 	type UploadStep = 'form' | 'uploading' | 'creating' | 'done' | 'error';
@@ -46,13 +46,16 @@
 
 			const uploadData = await getUploadUrl(file.name);
 
-			await fetch(uploadData.upload_url, {
+			const uploadResponse = await fetch(uploadData.upload_url, {
 				method: 'PUT',
 				body: file,
 				headers: {
 					'Content-Type': file.type || 'application/octet-stream'
 				}
 			});
+			if (!uploadResponse.ok) {
+				throw new Error('Video file upload failed. Please try again.');
+			}
 
 			step = 'creating';
 
@@ -69,7 +72,7 @@
 		} catch (e) {
 			step = 'error';
 			if (e instanceof ApiError) {
-				error = e.message;
+				error = friendlyApiMessage(e, 'Upload failed. Please try again.');
 			} else if (e instanceof Error) {
 				error = e.message;
 			} else {

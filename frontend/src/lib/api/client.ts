@@ -153,6 +153,9 @@ export function friendlyApiMessage(error: unknown, fallback = 'Something went wr
 		if (error.code === 'auth_service_failed') {
 			return 'Account creation is temporarily unavailable. Please try again shortly.';
 		}
+		if (error.code === 'storage_policy_denied') {
+			return 'Video storage is not configured yet. Please apply the storage policy and try again.';
+		}
 		return 'The server is temporarily unavailable. Please try again shortly.';
 	}
 	return fallback;
