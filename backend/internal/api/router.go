@@ -90,6 +90,7 @@ func NewRouter(d *Deps) http.Handler {
 			r.Use(requireAuth)
 			r.Get("/me", meH.Get)
 			r.Put("/me", meH.Update)
+			r.Get("/me/videos", videoH.ListMine)
 		})
 
 		// --- Videos ---

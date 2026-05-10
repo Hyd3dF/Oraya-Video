@@ -24,7 +24,7 @@
 	}
 </script>
 
-<a href="/video/{video.id}" class="video-card">
+<a href={`/video/${video.id}`} class="video-card">
 	<div class="thumbnail">
 		{#if thumbnailUrl}
 			<img src={thumbnailUrl} alt={video.title} loading="lazy" />

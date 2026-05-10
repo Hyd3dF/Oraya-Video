@@ -28,12 +28,22 @@ var MVPRendition720p = HLSRendition{
 }
 
 type FFmpeg struct {
-	Bin     string
+	Bin      string
 	ProbeBin string
 }
 
 func NewFFmpeg(bin, probeBin string) *FFmpeg {
 	return &FFmpeg{Bin: bin, ProbeBin: probeBin}
+}
+
+func (f *FFmpeg) Available() error {
+	if _, err := exec.LookPath(f.Bin); err != nil {
+		return fmt.Errorf("%s not found: %w", f.Bin, err)
+	}
+	if _, err := exec.LookPath(f.ProbeBin); err != nil {
+		return fmt.Errorf("%s not found: %w", f.ProbeBin, err)
+	}
+	return nil
 }
 
 // TranscodeHLS converts an input file to a single-quality HLS package

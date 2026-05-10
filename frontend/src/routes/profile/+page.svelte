@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { auth } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
-	import { getVideos } from '$lib/api/videos';
+	import { getMyVideos } from '$lib/api/videos';
 	import VideoCard from '$lib/components/VideoCard.svelte';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import EmptyState from '$lib/components/EmptyState.svelte';
@@ -38,9 +38,8 @@
 	async function loadUserVideos() {
 		videosLoading = true;
 		try {
-			// Fetch all videos and filter by owner - simple approach
-			const data = await getVideos(100, 0);
-			videos = (data.videos || []).filter((v) => v.owner_id === auth.user?.id);
+			const data = await getMyVideos(100, 0);
+			videos = data.videos || [];
 		} catch {
 			videos = [];
 		} finally {

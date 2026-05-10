@@ -60,6 +60,11 @@ func main() {
 	// --- Worker ---
 	queue := worker.NewMemoryQueue()
 	ff := worker.NewFFmpeg(cfg.Worker.FFmpegBin, cfg.Worker.FFprobeBin)
+	processVideos := true
+	if err := ff.Available(); err != nil {
+		processVideos = false
+		logger.Warn("ffmpeg unavailable; uploaded source files will be served directly", "err", err)
+	}
 	processor := worker.NewProcessor(
 		queue, videos, ff, sb,
 		cfg.Storage.BucketRaw, cfg.Storage.BucketHLS,
@@ -72,7 +77,7 @@ func main() {
 	authSvc := services.NewAuthService(users, sb)
 	userSvc := services.NewUserService(users)
 	uploadSvc := services.NewUploadService(sb, cfg.Storage.BucketRaw)
-	videoSvc := services.NewVideoService(videos, views, queue)
+	videoSvc := services.NewVideoService(videos, views, queue, sb, cfg.Storage.BucketRaw, processVideos)
 	commentSvc := services.NewCommentService(comments)
 	channelSvc := services.NewChannelService(users, videos, subs)
 	searchSvc := services.NewSearchService(search)

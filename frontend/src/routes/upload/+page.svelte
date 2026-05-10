@@ -157,7 +157,7 @@
 				<h2>Upload Complete!</h2>
 				<p>Your video is being processed. It will be available shortly.</p>
 				<div class="done-actions">
-					<a href="/video/{uploadedVideoId}" class="btn btn-primary">View Video</a>
+					<a href={`/video/${uploadedVideoId}`} class="btn btn-primary">View Video</a>
 					<button class="btn btn-secondary" onclick={reset}>Upload Another</button>
 				</div>
 			</div>

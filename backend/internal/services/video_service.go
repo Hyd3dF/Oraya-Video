@@ -9,19 +9,30 @@ import (
 	"github.com/google/uuid"
 	"github.com/oroya/backend/internal/models"
 	"github.com/oroya/backend/internal/repository"
+	"github.com/oroya/backend/internal/supabase"
 	"github.com/oroya/backend/internal/worker"
 )
 
 var ErrForbidden = errors.New("forbidden")
 
 type VideoService struct {
-	videos repository.VideoRepository
-	views  repository.ViewRepository
-	queue  worker.Queue
+	videos        repository.VideoRepository
+	views         repository.ViewRepository
+	queue         worker.Queue
+	sb            *supabase.Client
+	sourceBucket  string
+	processVideos bool
 }
 
-func NewVideoService(videos repository.VideoRepository, views repository.ViewRepository, queue worker.Queue) *VideoService {
-	return &VideoService{videos: videos, views: views, queue: queue}
+func NewVideoService(videos repository.VideoRepository, views repository.ViewRepository, queue worker.Queue, sb *supabase.Client, sourceBucket string, processVideos bool) *VideoService {
+	return &VideoService{
+		videos:        videos,
+		views:         views,
+		queue:         queue,
+		sb:            sb,
+		sourceBucket:  sourceBucket,
+		processVideos: processVideos,
+	}
 }
 
 func (s *VideoService) Create(ctx context.Context, ownerID string, req *models.CreateVideoRequest) (*models.Video, error) {
@@ -42,12 +53,32 @@ func (s *VideoService) Create(ctx context.Context, ownerID string, req *models.C
 		ThumbnailURL:    req.ThumbnailURL,
 		DurationSeconds: req.DurationSeconds,
 		Visibility:      visibility,
-		Status:          "processing",
+		Status:          "ready",
 		CreatedAt:       now,
 		UpdatedAt:       now,
 	}
+	if s.processVideos {
+		v.Status = "processing"
+	}
 	if err := s.videos.Create(ctx, v); err != nil {
 		return nil, err
+	}
+
+	if !s.processVideos {
+		if s.sb == nil || strings.TrimSpace(s.sourceBucket) == "" {
+			return nil, errors.New("source video storage is not configured")
+		}
+		asset := &models.VideoAsset{
+			ID:          uuid.NewString(),
+			VideoID:     v.ID,
+			Quality:     "source",
+			PlaylistURL: s.sb.PublicURL(s.sourceBucket, req.StoragePath),
+			CreatedAt:   now,
+		}
+		if err := s.videos.AddAsset(ctx, asset); err != nil {
+			return nil, err
+		}
+		return v, nil
 	}
 
 	if err := s.queue.Enqueue(worker.Job{
@@ -81,6 +112,16 @@ func (s *VideoService) List(ctx context.Context, limit, offset int) ([]models.Vi
 		limit = 24
 	}
 	return s.videos.List(ctx, repository.ListVideosOpts{Limit: limit, Offset: offset, Status: "ready"})
+}
+
+func (s *VideoService) ListByOwner(ctx context.Context, ownerID string, limit, offset int) ([]models.Video, error) {
+	if strings.TrimSpace(ownerID) == "" {
+		return nil, ErrInvalidInput
+	}
+	if limit <= 0 || limit > 100 {
+		limit = 24
+	}
+	return s.videos.List(ctx, repository.ListVideosOpts{Limit: limit, Offset: offset, OwnerID: ownerID})
 }
 
 func (s *VideoService) Update(ctx context.Context, id, userID string, patch *models.UpdateVideoRequest) (*models.Video, error) {

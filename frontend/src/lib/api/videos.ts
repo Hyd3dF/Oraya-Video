@@ -14,6 +14,10 @@ export async function getVideos(limit = 24, offset = 0): Promise<VideoListRespon
 	return apiGet<VideoListResponse>(`/api/v1/videos?limit=${limit}&offset=${offset}`);
 }
 
+export async function getMyVideos(limit = 100, offset = 0): Promise<VideoListResponse> {
+	return apiGet<VideoListResponse>(`/api/v1/me/videos?limit=${limit}&offset=${offset}`);
+}
+
 export async function getVideo(id: string): Promise<VideoDetailResponse> {
 	return apiGet<VideoDetailResponse>(`/api/v1/videos/${id}`);
 }

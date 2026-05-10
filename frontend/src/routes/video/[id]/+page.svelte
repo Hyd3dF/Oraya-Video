@@ -161,6 +161,7 @@
 			<div class="player-area">
 				{#if hlsUrl}
 					<video controls class="video-player" src={hlsUrl} poster={video.thumbnail_url || ''}>
+						<track kind="captions" />
 						Your browser does not support the video tag.
 					</video>
 				{:else}
@@ -172,7 +173,17 @@
 							<polygon points="5 3 19 12 5 21 5 3" />
 						</svg>
 						{#if video.status && video.status !== 'ready'}
-							<p class="player-status">Status: {video.status}</p>
+							<p class="player-status">
+								{#if video.status === 'processing'}
+									Video is still processing. It will be available shortly.
+								{:else if video.status === 'failed'}
+									Video processing failed. Please upload it again.
+								{:else}
+									Status: {video.status}
+								{/if}
+							</p>
+						{:else}
+							<p class="player-status">Video file is not ready yet.</p>
 						{/if}
 					</div>
 				{/if}
@@ -230,7 +241,7 @@
 									{link.title}
 								</a>
 								{#if isOwner}
-									<button class="btn btn-ghost btn-sm" onclick={() => handleDeleteLink(link.id)}>
+									<button class="btn btn-ghost btn-sm" onclick={() => handleDeleteLink(link.id)} aria-label="Delete link">
 										<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 											<line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
 										</svg>

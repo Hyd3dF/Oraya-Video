@@ -30,6 +30,18 @@ func (h *VideoHandler) List(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusOK, map[string]any{"videos": vids})
 }
 
+func (h *VideoHandler) ListMine(w http.ResponseWriter, r *http.Request) {
+	claims, _ := mw.ClaimsFrom(r.Context())
+	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+	offset, _ := strconv.Atoi(r.URL.Query().Get("offset"))
+	vids, err := h.svc.ListByOwner(r.Context(), claims.UserID, limit, offset)
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	utils.WriteJSON(w, http.StatusOK, map[string]any{"videos": vids})
+}
+
 func (h *VideoHandler) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	v, assets, links, err := h.svc.Get(r.Context(), id)

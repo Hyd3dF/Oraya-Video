@@ -12,10 +12,14 @@
 -- Ensure buckets exist.
 insert into storage.buckets (id, name, public)
 values
-  ('raw-videos', 'raw-videos', false),
+  ('raw-videos', 'raw-videos', true),
   ('hls-videos', 'hls-videos', true),
   ('thumbnails', 'thumbnails', true)
 on conflict (id) do nothing;
+
+update storage.buckets
+set public = true
+where id = 'raw-videos';
 
 -- Storage object policies, limited to Oroya buckets.
 drop policy if exists oroya_storage_select on storage.objects;
