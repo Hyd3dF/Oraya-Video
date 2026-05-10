@@ -33,6 +33,10 @@ func New(baseURL, serviceKey, anonKey string) *Client {
 	}
 }
 
+func (c *Client) HasServiceKey() bool {
+	return c.serviceKey != ""
+}
+
 type APIError struct {
 	Status  int    `json:"-"`
 	Code    string `json:"error_code,omitempty"`

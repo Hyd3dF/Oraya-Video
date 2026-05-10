@@ -21,10 +21,16 @@ func (c *Client) SignUp(email, password string, metadata map[string]any) (*GoTru
 	body := map[string]any{
 		"email":         email,
 		"password":      password,
-		"email_confirm": true,
 		"user_metadata": metadata,
 	}
-	resp, err := c.do(http.MethodPost, "/auth/v1/admin/users", body, false, "")
+	path := "/auth/v1/signup"
+	useAnon := true
+	if c.HasServiceKey() {
+		body["email_confirm"] = true
+		path = "/auth/v1/admin/users"
+		useAnon = false
+	}
+	resp, err := c.do(http.MethodPost, path, body, useAnon, "")
 	if err != nil {
 		return nil, err
 	}
